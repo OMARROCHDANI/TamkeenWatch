@@ -94,153 +94,154 @@ const initHeroAnimations = () => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   2. PRODUCT REVEAL ANIMATIONS
+   2. PRODUCT REVEAL ANIMATIONS (STABILIZED REBUILD)
    ═══════════════════════════════════════════════════════════════ */
 const initProductRevealAnimations = () => {
+  const section = document.querySelector('.product-reveal');
+  const container = document.querySelector('.product-reveal-watch-container');
   const watch = document.querySelector('.product-reveal-watch');
-  const title = document.querySelector('.product-reveal-title');
-  const subtitle = document.querySelector('.product-reveal-subtitle');
-  const ctaGroup = document.querySelector('.product-reveal-cta-group');
-  const textBg = document.querySelector('.product-reveal-text-bg');
   const details = document.querySelector('.product-reveal-details');
+  const textBg = document.querySelector('.product-reveal-text-bg');
 
-  if (!watch) return;
+  if (!section || !container || !watch) return;
 
-  // Entrance animations
-  gsap.from(watch, {
-    y: 50, opacity: 0, rotation: -5, duration: 1.5, ease: 'power4.out',
+  // 1. Initial High-Performance State
+  gsap.set(container, { 
+    autoAlpha: 0, 
+    scale: 0.8, 
+    rotationZ: -15, 
+    force3D: true,
+    filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.7))'
+  });
+  
+  gsap.set(details.children, { autoAlpha: 0, y: 30 });
+  if (textBg) gsap.set(textBg, { autoAlpha: 0, y: 50 });
+
+  // 2. Entrance Reveal
+  const entranceTl = gsap.timeline({
     scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top 60%',
+      trigger: section,
+      start: 'top 85%',
       toggleActions: 'play none none reverse',
-    },
+      once: true // Only reveal once to keep it stable
+    }
   });
 
-  gsap.from(title, {
-    y: 40, opacity: 0, duration: 1.2, ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top 55%',
-      toggleActions: 'play none none reverse',
-    },
-  });
+  entranceTl.to(container, { autoAlpha: 1, scale: 1, rotationZ: 0, duration: 1, ease: 'power3.out' })
+    .to(details.children, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.8, ease: 'power2.out' }, '-=0.8')
+    .to(textBg, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.8');
 
-  gsap.from(subtitle, {
-    y: 30, opacity: 0, duration: 1, ease: 'power3.out',
+  // 3. Ultra-Smooth Scrub
+  gsap.to(container, {
+    rotationZ: 25,
+    scale: 1.35,
+    y: -50,
+    force3D: true,
     scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top 50%',
-      toggleActions: 'play none none reverse',
-    },
-  });
-
-  gsap.from(ctaGroup, {
-    y: 30, opacity: 0, duration: 1, ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top 45%',
-      toggleActions: 'play none none reverse',
-    },
-  });
-
-  // Scroll-driven rotation & zoom
-  gsap.to(watch, {
-    rotation: 20, scale: 1.3,
-    scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 1.5,
-    },
-  });
-
-  gsap.to(details, {
-    y: -150,
-    scrollTrigger: {
-      trigger: '.product-reveal',
-      start: 'top top',
-      end: 'bottom top',
+      trigger: section,
+      start: 'top bottom',
+      end: 'top top',
       scrub: true,
-    },
+    }
   });
 
-  if (textBg) {
-    gsap.to(textBg, {
-      y: -250,
-      scrollTrigger: {
-        trigger: '.product-reveal',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1.2,
-      },
-    });
-  }
+  gsap.to(textBg, {
+    y: -200,
+    scrollTrigger: {
+      trigger: section,
+      start: 'top bottom',
+      end: 'top top',
+      scrub: true
+    }
+  });
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   3. ETHOS / COLLECTION ANIMATIONS
+   3. ETHOS / COLLECTION (PURE GSAP REBUILD)
    ═══════════════════════════════════════════════════════════════ */
 const initEthosAnimations = () => {
-  const bgImages = document.querySelectorAll('.ethos-bg-img');
   const section = document.querySelector('.ethos');
+  const variants = document.querySelectorAll('.ethos-main');
+  const bgs = document.querySelectorAll('.ethos-bg-img');
 
-  if (!section) return;
+  if (!section || variants.length === 0) return;
 
-  // BG parallax
-  bgImages.forEach((img) => {
-    gsap.to(img, {
-      scale: 1.1, yPercent: 10,
-      scrollTrigger: {
-        trigger: '.ethos',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      },
+  // 1. Pre-render All to avoid "Big Photo" glitch
+  gsap.set(variants, { autoAlpha: 0, x: 100, scale: 0.95, zIndex: 1 });
+  gsap.set(bgs, { autoAlpha: 0, zIndex: 1 });
+
+  // Set initial active state manually
+  const initialIdx = 0;
+  gsap.set(variants[initialIdx], { autoAlpha: 1, x: 0, scale: 1, zIndex: 10 });
+  gsap.set(bgs[initialIdx], { autoAlpha: 0.6, zIndex: 5 });
+  variants[initialIdx].classList.add('active'); // Still used for logic, not styling
+
+  let isAnimating = false;
+  const nextBtns = document.querySelectorAll('.ethos-next-btn');
+
+  nextBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (isAnimating) return;
+
+      const targetId = btn.dataset.target; // bl or rs
+      const current = document.querySelector('.ethos-main.active');
+      const next = document.querySelector(`.ethos-main.variant-${targetId}`);
+      
+      // Map targets to backgrounds
+      const currentBg = section.querySelector(`.ethos-bg-img[class*="active"]`);
+      const nextBg = section.querySelector(`.ethos-bg-${targetId}`);
+
+      if (!current || !next || current === next) return;
+
+      isAnimating = true;
+      const tl = gsap.timeline({
+        onComplete: () => {
+          isAnimating = false;
+          current.classList.remove('active');
+          next.classList.add('active');
+          if (currentBg) currentBg.classList.remove('active');
+          if (nextBg) nextBg.classList.add('active');
+        }
+      });
+
+      // CROSS-FADE SYSTEM
+      // Move Current Out
+      tl.to(current, { 
+        autoAlpha: 0, 
+        x: -60, 
+        duration: 0.6, 
+        ease: 'expo.inOut' 
+      }, 0);
+      
+      if (currentBg) tl.to(currentBg, { autoAlpha: 0, duration: 0.6 }, 0);
+
+      // Move Next In
+      tl.fromTo(next, 
+        { autoAlpha: 0, x: 60, scale: 0.98, zIndex: 20 },
+        { 
+          autoAlpha: 1, 
+          x: 0, 
+          scale: 1, 
+          duration: 0.8, 
+          ease: 'expo.out' // Snappier feel
+        }, 
+      0.3);
+
+      if (nextBg) tl.to(nextBg, { autoAlpha: 0.6, duration: 0.8 }, 0.3);
     });
   });
 
-  // Variant switcher
-  const nextBtns = document.querySelectorAll('.ethos-next-btn');
-  nextBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = btn.dataset.target;
-      const currentActive = document.querySelector('.ethos-main.active');
-      const currentBg = document.querySelector('.ethos-bg-img.active');
-      const nextVariant = document.querySelector(`.ethos-main.variant-${target}`);
-      const nextBg = document.querySelector(`.ethos-bg-${target}`);
-
-      if (!currentActive || !nextVariant || currentActive === nextVariant) return;
-
-      const currentText = currentActive.querySelector('.ethos-text-side');
-      const currentWatch = currentActive.querySelector('.ethos-watch-img');
-      const nextText = nextVariant.querySelector('.ethos-text-side');
-      const nextWatch = nextVariant.querySelector('.ethos-watch-img');
-
-      const switchTl = gsap.timeline({
-        onComplete: () => {
-          gsap.set([nextText, nextWatch], { clearProps: 'all' });
-        },
-      });
-
-      // Animate out
-      switchTl.to(currentText, { x: -100, opacity: 0, duration: 0.5, ease: 'power2.in' }, 0);
-      switchTl.to(currentWatch, { x: -150, opacity: 0, duration: 0.5, ease: 'power2.in' }, 0);
-
-      // Swap active
-      switchTl.call(() => {
-        currentActive.classList.remove('active');
-        nextVariant.classList.add('active');
-        if (currentBg) currentBg.classList.remove('active');
-        if (nextBg) nextBg.classList.add('active');
-        gsap.set(currentText, { clearProps: 'all' });
-        gsap.set(currentWatch, { clearProps: 'all' });
-        gsap.set(nextText, { x: 100, opacity: 0 });
-        gsap.set(nextWatch, { x: 150, opacity: 0 });
-      }, null, null, 0.55);
-
-      // Animate in
-      switchTl.to(nextText, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 0.6);
-      switchTl.to(nextWatch, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 0.65);
+  // BG Parallax
+  bgs.forEach(img => {
+    gsap.to(img, {
+      yPercent: 15,
+      scale: 1.1,
+      scrollTrigger: {
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
+      }
     });
   });
 };
