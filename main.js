@@ -99,61 +99,70 @@ const initHeroAnimations = () => {
 const initProductRevealAnimations = () => {
   const section = document.querySelector('.product-reveal');
   const container = document.querySelector('.product-reveal-watch-container');
-  const watch = document.querySelector('.product-reveal-watch');
   const details = document.querySelector('.product-reveal-details');
   const textBg = document.querySelector('.product-reveal-text-bg');
 
-  if (!section || !container || !watch) return;
+  if (!section || !container) return;
 
-  // 1. Initial High-Performance State
-  gsap.set(container, { 
-    autoAlpha: 0, 
-    scale: 0.8, 
-    rotationZ: -15, 
-    force3D: true,
-    filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.7))'
-  });
-  
-  gsap.set(details.children, { autoAlpha: 0, y: 30 });
-  if (textBg) gsap.set(textBg, { autoAlpha: 0, y: 50 });
+  const mm = gsap.matchMedia();
 
-  // 2. Entrance Reveal
-  const entranceTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: 'top 85%',
-      toggleActions: 'play none none reverse',
-      once: true // Only reveal once to keep it stable
+  // Unified logic for all screen sizes (Mobile, Tablet, and Desktop)
+  mm.add("(min-width: 0px)", () => {
+    // 1. Initial State
+    gsap.set(container, { 
+      autoAlpha: 0, 
+      scale: 0.8, 
+      rotationZ: -15, 
+      force3D: true,
+      filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.7))'
+    });
+    
+    gsap.set(details.children, { autoAlpha: 0, y: 30 });
+    if (textBg) gsap.set(textBg, { autoAlpha: 0, y: 50 });
+
+    // 2. Entrance Reveal
+    const entranceTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse',
+        once: true
+      }
+    });
+
+    entranceTl.to(container, { autoAlpha: 1, scale: 1, rotationZ: 0, duration: 1.2, ease: 'power3.out' })
+      .to(details.children, { autoAlpha: 1, y: 0, stagger: 0.1, duration: 0.8, ease: 'power2.out' }, '-=0.8')
+      .to(textBg, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.8');
+
+    // 3. Scrub Animation (Rotation + Scale + Vertical)
+    gsap.to(container, {
+      rotationZ: 25,
+      scale: 1.35,
+      y: -80,
+      force3D: true,
+      scrollTrigger: {
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1.5, // Smoothed for a more premium feel
+      }
+    });
+
+    if (textBg) {
+      gsap.to(textBg, {
+        y: -250,
+        scrollTrigger: {
+          trigger: section,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.2
+        }
+      });
     }
   });
 
-  entranceTl.to(container, { autoAlpha: 1, scale: 1, rotationZ: 0, duration: 1, ease: 'power3.out' })
-    .to(details.children, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.8, ease: 'power2.out' }, '-=0.8')
-    .to(textBg, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.8');
+  // Static mobile override removed to enable animation everywhere
 
-  // 3. Ultra-Smooth Scrub
-  gsap.to(container, {
-    rotationZ: 25,
-    scale: 1.35,
-    y: -50,
-    force3D: true,
-    scrollTrigger: {
-      trigger: section,
-      start: 'top bottom',
-      end: 'top top',
-      scrub: true,
-    }
-  });
-
-  gsap.to(textBg, {
-    y: -200,
-    scrollTrigger: {
-      trigger: section,
-      start: 'top bottom',
-      end: 'top top',
-      scrub: true
-    }
-  });
 };
 
 /* ═══════════════════════════════════════════════════════════════
