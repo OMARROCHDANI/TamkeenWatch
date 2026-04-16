@@ -144,9 +144,11 @@ body.loader-active {
   0% {
     transform: translateX(-100%);
   }
+
   50% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(100%);
   }
@@ -474,11 +476,17 @@ button {
 }
 
 .product-reveal-details {
-  position: absolute;
-  bottom: 10%;
-  left: 5%;
-  width: 40%;
-  z-index: 5
+  z-index: 5;
+}
+
+/* Desktop & Tablet Positioning */
+@media (min-width: 481px) {
+  .product-reveal-details {
+    position: absolute;
+    bottom: 10%;
+    left: 5%;
+    width: 40%;
+  }
 }
 
 .product-reveal-title {
@@ -1783,26 +1791,31 @@ button {
     align-items: center;
   }
 
+  /* Product Reveal 480px - Refactored Best Practices */
+  .product-reveal {
+    min-height: 100vh;
+    padding: 1px 0;
+    display: flex;
+    align-items: center;
+  }
+
   .product-reveal-content {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 100vh !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
     padding: 0 5%;
     position: relative;
   }
 
   .product-reveal-details {
-    display: contents !important;
-    position: static !important;
-    width: 100% !important;
-    bottom: auto !important;
-    left: auto !important;
+    display: contents;
+    /* Unwraps children to be direct flex items of .product-reveal-content */
   }
 
   .product-reveal-title {
-    order: 1 !important;
+    order: 1;
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 30px;
@@ -1812,27 +1825,28 @@ button {
   }
 
   .product-reveal-watch-container {
-    order: 2 !important;
-    position: relative !important;
+    order: 2;
+    position: relative;
     width: 100%;
-    margin: 40px 0;
+    margin-top: 10px;
+    margin-bottom: -35px;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 280px;
+    min-height: 220px;
     z-index: 5;
   }
 
   .product-reveal-watch {
-    width: 100% !important;
-    max-width: 340px !important;
+    width: 100%;
+    max-width: 350px;
     height: auto;
     display: block;
     margin: 0 auto;
   }
 
   .product-reveal-subtitle {
-    order: 3 !important;
+    order: 3;
     text-align: center;
     font-size: 1rem;
     line-height: 1.6;
@@ -1843,7 +1857,7 @@ button {
   }
 
   .product-reveal-cta-group {
-    order: 4 !important;
+    order: 4;
     display: flex;
     flex-direction: column;
     align-items: center;

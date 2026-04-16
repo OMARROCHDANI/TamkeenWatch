@@ -140,23 +140,23 @@ const initProductRevealAnimations = () => {
     gsap.to(container, {
       rotationZ: 25,
       scale: 1.35,
-      y: -80,
+      y: 0, // Set to 0 to keep it centered when it stops
       force3D: true,
       scrollTrigger: {
         trigger: section,
         start: 'top bottom',
-        end: 'bottom top',
+        end: 'center center',
         scrub: 1.5, // Smoothed for a more premium feel
       }
     });
 
     if (textBg) {
       gsap.to(textBg, {
-        y: -250,
+        y: -100, // Reduced parallax for better alignment
         scrollTrigger: {
           trigger: section,
           start: 'top bottom',
-          end: 'bottom top',
+          end: 'center center',
           scrub: 1.2
         }
       });
