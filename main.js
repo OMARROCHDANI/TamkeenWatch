@@ -47,7 +47,7 @@ const initHeroAnimations = () => {
   if (!video) return;
 
   // Entrance Timeline
-  const tl = gsap.timeline({ defaults: { ease: 'power2.out' }, paused: true });
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
 
   gsap.set(video, { scale: 1.2, opacity: 0 });
   gsap.set(heroTextBg, { scale: 0.5, opacity: 0 });
@@ -61,7 +61,6 @@ const initHeroAnimations = () => {
     .to(heroCtaGroup, { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }, '-=0.6')
     .to(nav, { y: 0, opacity: 1, duration: 1, ease: 'power4.out' }, '-=0.8');
 
-  return tl;
 
   // Scroll-driven parallax
   gsap.to(video, {
@@ -411,37 +410,12 @@ const initScrollReveals = () => {
   });
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   7. LOADER INITIALIZATION
-   ═══════════════════════════════════════════════════════════════ */
-const initLoader = (heroTl) => {
-  const loader = document.getElementById('loader');
-  const body = document.body;
-
-  if (!loader) return;
-
-  // We use the load event to ensure all assets are ready
-  window.addEventListener('load', () => {
-    // Add a slight delay for aesthetic flow
-    setTimeout(() => {
-      loader.classList.add('hidden');
-      body.classList.remove('loader-active');
-      
-      // Start hero entrance if provided
-      if (heroTl) heroTl.play();
-      
-      // Refresh ScrollTrigger as elements might have shifted
-      ScrollTrigger.refresh();
-    }, 1500); // 1.5 seconds delay
-  });
-};
 
 /* ═══════════════════════════════════════════════════════════════
    INIT ALL
    ═══════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  const heroTl = initHeroAnimations();
-  initLoader(heroTl);
+  initHeroAnimations();
   initProductRevealAnimations();
   initEthosAnimations();
   initDismantleAnimations();
