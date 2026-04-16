@@ -354,43 +354,9 @@ const initNavScroll = () => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   6. MODAL + SMOOTH SCROLL ANCHORS
+   6. SMOOTH SCROLL ANCHORS
    ═══════════════════════════════════════════════════════════════ */
-const initModal = () => {
-  const modal = document.getElementById('reserve-modal');
-  const closeBtn = document.getElementById('modal-close');
-  const openBtns = document.querySelectorAll('.open-reserve-modal');
-
-  if (!modal) return;
-
-  const openModal = () => {
-    modal.classList.add('active');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeModal = () => {
-    modal.classList.remove('active');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  };
-
-  openBtns.forEach((btn) => btn.addEventListener('click', openModal));
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-  // Close on overlay click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  // Smooth scroll anchors
+const initSmoothScroll = () => {
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', (e) => {
       e.preventDefault();
@@ -481,5 +447,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initDismantleAnimations();
   initScrollReveals();
   initNavScroll();
-  initModal();
+  initSmoothScroll();
 });

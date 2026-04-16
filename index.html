@@ -55,7 +55,8 @@
       </div>
     </div>
     <div class="nav-right">
-      <button class="nav-cta open-reserve-modal" id="nav-reserve-btn">Reserve Now</button>
+      <a class="nav-cta" id="nav-reserve-btn" href="https://www.instagram.com/tamkeenagency/" target="_blank"
+        rel="noopener">Reserve Now</a>
     </div>
   </nav>
 
@@ -294,7 +295,8 @@
           <h5 class="footer-col-title">Midnight Core</h5>
           <p class="footer-col-desc">Be among the first 100 to own a piece of quiet power. Reserve your numbered Tamkeen
             Noir timepiece today.</p>
-          <button class="footer-reserve-btn open-reserve-modal" id="footer-reserve-btn">Reserve Your Piece</button>
+          <a class="footer-reserve-btn" id="footer-reserve-btn" href="https://www.instagram.com/tamkeenagency/"
+            target="_blank" rel="noopener">Reserve Your Piece</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -308,64 +310,7 @@
     </div>
   </footer>
 
-  <!-- ═══════════════════════ RESERVATION MODAL ═══════════════════════ -->
-  <div class="modal-overlay" id="reserve-modal" aria-hidden="true">
-    <div class="modal">
-      <button class="modal-close" id="modal-close" aria-label="Close reservation modal">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <div class="modal-left">
-        <img class="modal-watch-img" src="/assets/photo/z1.png" alt="Tamkeen Noir Showcase" />
-        <div class="modal-left-overlay"></div>
-        <div class="modal-left-text">
-          <p class="modal-left-tag">No. 01 / 100</p>
-          <h3 class="modal-left-title">Tamkeen<br />Noir</h3>
-        </div>
-      </div>
-      <div class="modal-right">
-        <p class="modal-eyebrow">Private Reservation</p>
-        <h2 class="modal-title">Secure Your <em>Piece</em></h2>
-        <p class="modal-subtitle">One of 100 numbered Midnight Core editions. Reserve yours before they are gone.</p>
-        <form class="modal-form" id="reserve-form" name="reservation" method="POST" data-netlify="true">
-          <input type="hidden" name="form-name" value="reservation" />
-          <div class="form-row">
-            <div class="form-group">
-              <label for="first-name">First Name</label>
-              <input type="text" id="first-name" name="first-name" required />
-            </div>
-            <div class="form-group">
-              <label for="last-name">Last Name</label>
-              <input type="text" id="last-name" name="last-name" required />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required />
-          </div>
-          <div class="form-group">
-            <label for="phone">Phone / WhatsApp</label>
-            <input type="tel" id="phone" name="phone" />
-          </div>
-          <div class="form-group">
-            <label for="variant">Preferred Variant</label>
-            <select id="variant" name="variant">
-              <option value="matte">Matte Black Dial — TMK-NR-MB-01</option>
-              <option value="steel">Brushed Steel Black — TMK-NR-BS-02</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="3"></textarea>
-          </div>
-          <button type="submit" class="form-submit-btn" id="form-submit-btn">Submit Reservation</button>
-        </form>
-      </div>
-    </div>
-  </div>
+
 
   <script type="module" src="./main.js"></script>
 </body>
