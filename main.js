@@ -19,17 +19,13 @@ const lenis = new Lenis({
   smoothWheel: true,
 });
 
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
-
 // Sync Lenis with ScrollTrigger
 lenis.on('scroll', ScrollTrigger.update);
+
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
+
 gsap.ticker.lagSmoothing(0);
 
 /* ═══════════════════════════════════════════════════════════════
@@ -107,63 +103,64 @@ const initProductRevealAnimations = () => {
 
   const mm = gsap.matchMedia();
 
-  // Unified logic for all screen sizes (Mobile, Tablet, and Desktop)
   mm.add("(min-width: 0px)", () => {
     // 1. Initial State
     gsap.set(container, { 
-      autoAlpha: 0, 
-      scale: 0.8, 
-      rotationZ: -15, 
+      autoAlpha: 0,
       force3D: true,
-      filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.7))'
+      filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.7))',
+      transformOrigin: 'center center'
     });
     
-    gsap.set(details.children, { autoAlpha: 0, y: 30 });
+    if (details) gsap.set(details.children, { autoAlpha: 0, y: 30 });
     if (textBg) gsap.set(textBg, { autoAlpha: 0, y: 50 });
 
-    // 2. Entrance Reveal
+    // 2. Entrance Timeline (Triggered once when scrolled into view)
     const entranceTl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top 85%',
-        toggleActions: 'play none none reverse',
         once: true
       }
     });
 
-    entranceTl.to(container, { autoAlpha: 1, scale: 1, rotationZ: 0, duration: 1.2, ease: 'power3.out' })
-      .to(details.children, { autoAlpha: 1, y: 0, stagger: 0.1, duration: 0.8, ease: 'power2.out' }, '-=0.8')
+    entranceTl.to(container, { autoAlpha: 1, duration: 1.2, ease: 'power2.out' })
+      .to(details ? details.children : [], { autoAlpha: 1, y: 0, stagger: 0.1, duration: 0.8, ease: 'power2.out' }, '-=0.8')
       .to(textBg, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.8');
 
-    // 3. Scrub Animation (Rotation + Scale + Vertical)
-    gsap.to(container, {
-      rotationZ: 25,
-      scale: 1.35,
-      y: 0, // Set to 0 to keep it centered when it stops
-      force3D: true,
-      scrollTrigger: {
-        trigger: section,
-        start: 'top bottom',
-        end: 'center center',
-        scrub: 1.5, // Smoothed for a more premium feel
-      }
-    });
-
-    if (textBg) {
-      gsap.to(textBg, {
-        y: -100, // Reduced parallax for better alignment
+    // 3. Subtle Parallax (Replaces the broken scale 1.35 / rotation 25 logic)
+    gsap.fromTo(container, 
+      { y: 80, scale: 0.95 }, 
+      {
+        y: -40, 
+        scale: 1.05,
+        force3D: true,
+        ease: 'none',
         scrollTrigger: {
           trigger: section,
           start: 'top bottom',
-          end: 'center center',
-          scrub: 1.2
+          end: 'bottom top',
+          scrub: 1.2,
         }
-      });
+      }
+    );
+
+    if (textBg) {
+      gsap.fromTo(textBg, 
+        { y: 80 }, 
+        {
+          y: -80, 
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.2
+          }
+        }
+      );
     }
   });
-
-  // Static mobile override removed to enable animation everywhere
-
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -257,79 +254,68 @@ const initEthosAnimations = () => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   4. DISMANTLE / CRAFTSMANSHIP VIDEO ANIMATION
+   4. DISMANTLE / CRAFTSMANSHIP VIDEO ANIMATION (OPTIMIZED)
    ═══════════════════════════════════════════════════════════════ */
 const initDismantleAnimations = () => {
-  const canvas = document.getElementById('dismantle-canvas');
+  const container = document.getElementById('dismantle-sequence-container');
   const section = document.querySelector('.dismantle');
 
-  if (!canvas || !section) return;
+  if (!container || !section) return;
 
-  const context = canvas.getContext('2d');
   const frameCount = 190;
   const currentFrame = (index) => `/WatchFrames/ezgif-frame-${(index + 1).toString().padStart(3, '0')}.jpg`;
 
-  const images = [];
-  const frameObj = {
-    frame: 0
-  };
+  const frames = [];
+  const frameObj = { frame: 0 };
+  let lastFrame = 0;
 
+  // Build the DOM sequence
   for (let i = 0; i < frameCount; i++) {
-    const img = new Image();
+    const img = document.createElement('img');
     img.src = currentFrame(i);
-    images.push(img);
+    img.className = 'dismantle-frame';
+    img.loading = i < 15 ? 'eager' : 'lazy'; // Chunk the loading automatically
+    
+    if (i === 0) img.classList.add('active');
+    
+    container.appendChild(img);
+    frames.push(img);
   }
 
+  // 1. Strict step-based scrub for zero canvas lag
   gsap.to(frameObj, {
     frame: frameCount - 1,
-    snap: "frame",
-    ease: "none",
+    ease: `steps(${frameCount - 1})`,
     scrollTrigger: {
-      trigger: '.dismantle',
+      trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1,
+      scrub: 0.5,
+      pin: '.dismantle-container',
+      anticipatePin: 1
     },
-    onUpdate: render
-  });
-
-  images[0].onload = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    render();
-  };
-
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    render();
-  });
-
-  function render() {
-    if (images[frameObj.frame] && images[frameObj.frame].complete) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      const img = images[frameObj.frame];
-      
-      const canvasRatio = canvas.width / canvas.height;
-      const imgRatio = img.width / img.height;
-      
-      let drawWidth, drawHeight, offsetX, offsetY;
-
-      if (canvasRatio > imgRatio) {
-        drawWidth = canvas.width;
-        drawHeight = canvas.width / imgRatio;
-        offsetX = 0;
-        offsetY = (canvas.height - drawHeight) / 2;
-      } else {
-        drawWidth = canvas.height * imgRatio;
-        drawHeight = canvas.height;
-        offsetX = (canvas.width - drawWidth) / 2;
-        offsetY = 0;
+    onUpdate: () => {
+      const current = Math.floor(frameObj.frame);
+      if (current !== lastFrame && frames[current] && frames[lastFrame]) {
+        frames[lastFrame].classList.remove('active');
+        frames[current].classList.add('active');
+        lastFrame = current;
       }
-
-      context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     }
-  }
+  });
+
+  // 2. Scrollytelling reveals for text steps
+  const steps = gsap.utils.toArray('.dismantle-step-inner');
+  steps.forEach((step) => {
+    gsap.set(step, { autoAlpha: 0, y: 60 });
+    ScrollTrigger.create({
+      trigger: step,
+      start: 'top 75%',
+      end: 'bottom 25%',
+      toggleActions: 'play reverse play reverse',
+      animation: gsap.to(step, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+    });
+  });
 };
 
 /* ═══════════════════════════════════════════════════════════════

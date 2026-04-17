@@ -22,6 +22,10 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
     rel="stylesheet" />
 
+  <!-- Resource Hints -->
+  <link rel="preload" href="/assets/photo/logo.webp" as="image" />
+  <link rel="preload" href="https://res.cloudinary.com/dgzxun5ql/video/upload/hero-video_vfw0zh.webm" as="video" />
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -37,7 +41,7 @@
     </div>
     <div class="nav-center">
       <div class="nav-logo-container">
-        <img class="nav-logo-img" src="/assets/photo/logo.png" alt="Tamkeen Logo" />
+        <img class="nav-logo-img" src="/assets/photo/logo.webp" alt="Tamkeen Logo" fetchpriority="high" width="160" height="106" />
       </div>
     </div>
     <div class="nav-right">
@@ -71,13 +75,13 @@
   <!-- ═══════════════════════ PRODUCT REVEAL ═══════════════════════ -->
   <section class="product-reveal" id="product-reveal">
     <div class="product-reveal-bg">
-      <img class="product-reveal-bg-img" src="/assets/photo/bg1.png" alt="Product Background" />
+      <img class="product-reveal-bg-img" src="/assets/photo/bg1.webp" alt="Product Background" width="1234" height="705" />
       <div class="product-reveal-overlay"></div>
     </div>
     <div class="product-reveal-content">
       <div class="product-reveal-text-bg">PRECISION</div>
       <div class="product-reveal-watch-container">
-        <img class="product-reveal-watch" src="/assets/photo/watch.png" alt="Tamkeen Noir Watch" />
+        <img class="product-reveal-watch" src="/assets/photo/watch.webp" alt="Tamkeen Noir Watch" loading="lazy" decoding="async" width="1277" height="729" />
       </div>
       <div class="product-reveal-details">
         <h2 class="product-reveal-title">Minimal. <br /><span class="accent-gold">Unshakable.</span></h2>
@@ -95,7 +99,7 @@
   <!-- ═══════════════════════ HERITAGE SECTION ═══════════════════════ -->
   <section class="heritage" id="heritage">
     <div class="heritage-bg">
-      <img class="heritage-bg-img" src="/assets/photo/q1.png" alt="Heritage Background" />
+      <img class="heritage-bg-img" src="/assets/photo/q1.webp" alt="Heritage Background" loading="lazy" decoding="async" width="1344" height="768" />
       <div class="heritage-overlay"></div>
     </div>
     <div class="heritage-content">
@@ -151,7 +155,7 @@
           </div>
         </div>
         <div class="ethos-product-center">
-          <img class="ethos-watch-img" src="/assets/photo/ethos-watch.png" alt="Tamkeen Noir Matte" />
+          <img class="ethos-watch-img" src="/assets/photo/ethos-watch.webp" alt="Tamkeen Noir Matte" loading="lazy" decoding="async" width="1234" height="705" />
         </div>
       </div>
       <!-- Variant 2: STEEL -->
@@ -172,7 +176,7 @@
           </div>
         </div>
         <div class="ethos-product-center">
-          <img class="ethos-watch-img" src="/assets/photo/ethos-watch-rs.png" alt="Tamkeen Noir Steel" />
+          <img class="ethos-watch-img" src="/assets/photo/ethos-watch-rs.webp" alt="Tamkeen Noir Steel" loading="lazy" decoding="async" width="1234" height="705" />
         </div>
       </div>
     </div>
@@ -181,19 +185,36 @@
   <!-- ═══════════════════════ CRAFTSMANSHIP SECTION ═══════════════════════ -->
   <section class="dismantle" id="craftsmanship">
     <div class="dismantle-container">
-      <div class="dismantle-header">
-        <h2 class="section-title">PRECISION IN <span class="accent">EVERY DETAIL</span></h2>
-        <p class="section-subtitle">Every element refined to its essence. No distraction. No compromise. Only what
-          matters remains.</p>
+      <div id="dismantle-sequence-container"></div>
+      <div class="dismantle-overlay-gradient"></div>
+    </div>
+    
+    <div class="dismantle-scroll-content">
+      <div class="dismantle-step">
+        <div class="dismantle-step-inner">
+          <h2 class="section-title">PRECISION IN <br /><span class="accent">EVERY DETAIL</span></h2>
+          <p class="section-subtitle">Every element refined to its essence. No distraction. No compromise. Only what matters remains.</p>
+        </div>
       </div>
-      <canvas id="dismantle-canvas"></canvas>
+      <div class="dismantle-step">
+        <div class="dismantle-step-inner">
+          <h2 class="section-title">MICROSCOPIC <br /><span class="accent-gold">PERFECTION</span></h2>
+          <p class="section-subtitle">From the initial casing to the final polishing, each component is calibrated for flawless execution.</p>
+        </div>
+      </div>
+      <div class="dismantle-step">
+        <div class="dismantle-step-inner">
+          <h2 class="section-title">MASTER <br /><span class="accent">ASSEMBLY</span></h2>
+          <p class="section-subtitle">A harmony of components designed for ultimate performance and timeless presence.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ═══════════════════════ SHOWCASE SECTION ═══════════════════════ -->
   <section class="showcase" id="showcase">
     <div class="showcase-visual">
-      <img class="showcase-bg-img" src="/assets/photo/z1.png" alt="Showcase Watch" />
+      <img class="showcase-bg-img" src="/assets/photo/z1.webp" alt="Showcase Watch" loading="lazy" decoding="async" width="1344" height="768" />
       <div class="showcase-gradient"></div>
     </div>
     <div class="showcase-text">
@@ -220,7 +241,7 @@
       <div class="footer-grid">
         <!-- Brand Column -->
         <div class="footer-brand-col">
-          <img class="footer-logo" src="/assets/photo/logo.png" alt="Tamkeen" />
+          <img class="footer-logo" src="/assets/photo/logo.webp" alt="Tamkeen" loading="lazy" decoding="async" width="120" height="80" />
           <p class="footer-tagline">Madinah · Est. 2026</p>
           <p class="footer-address">Madinah, Saudi Arabia</p>
           <div class="footer-socials">
