@@ -290,9 +290,7 @@ const initDismantleAnimations = () => {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 0.5,
-      pin: '.dismantle-container',
-      anticipatePin: 1
+      scrub: 0.5
     },
     onUpdate: () => {
       const current = Math.floor(frameObj.frame);
