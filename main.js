@@ -257,49 +257,73 @@ const initEthosAnimations = () => {
    4. DISMANTLE / CRAFTSMANSHIP VIDEO ANIMATION (OPTIMIZED)
    ═══════════════════════════════════════════════════════════════ */
 const initDismantleAnimations = () => {
-  const container = document.getElementById('dismantle-sequence-container');
+  const canvas = document.getElementById('dismantle-canvas');
   const section = document.querySelector('.dismantle');
 
-  if (!container || !section) return;
+  if (!canvas || !section) return;
 
+  const context = canvas.getContext('2d');
   const frameCount = 190;
   const currentFrame = (index) => `/WatchFrames/ezgif-frame-${(index + 1).toString().padStart(3, '0')}.jpg`;
 
-  const frames = [];
-  const frameObj = { frame: 0 };
-  let lastFrame = 0;
+  // Matched exactly to the native image format! (1:1 blitting is infinitely faster than CPU resize)
+  canvas.width = 3840;
+  canvas.height = 2160;
 
-  // Build the DOM sequence
+  const images = [];
+  const imageSeq = { frame: 0 };
+
+  // Generate Image objects
   for (let i = 0; i < frameCount; i++) {
-    const img = document.createElement('img');
-    img.src = currentFrame(i);
-    img.className = 'dismantle-frame';
-    img.loading = i < 15 ? 'eager' : 'lazy'; // Chunk the loading automatically
-    
-    if (i === 0) img.classList.add('active');
-    
-    container.appendChild(img);
-    frames.push(img);
+    const img = new Image();
+    img.dataset.src = currentFrame(i);
+    images.push(img);
   }
 
-  // 1. Strict step-based scrub for zero canvas lag
-  gsap.to(frameObj, {
+  // Draw the image
+  const render = () => {
+    const frameIndex = Math.floor(imageSeq.frame);
+    const img = images[frameIndex];
+    if (img && img.complete && img.naturalWidth > 0) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(img, 0, 0); // 1:1 GPU-friendly draw
+    }
+  };
+
+  // Start preloading gracefully sequence by sequence (no network crush)
+  const preloadImages = () => {
+    let index = 0;
+    const loadNext = () => {
+      if (index >= frameCount) return;
+      const img = images[index];
+      img.onload = () => {
+        if (index === 0) render(); // Draw first immediately
+        index++;
+        loadNext();
+      };
+      img.onerror = () => {
+        index++;
+        loadNext();
+      };
+      img.src = img.dataset.src;
+    };
+    loadNext();
+  };
+
+  // Initiate background preload immediately after layout
+  requestIdleCallback ? requestIdleCallback(preloadImages) : setTimeout(preloadImages, 100);
+
+  // Canvas scrub timeline
+  gsap.to(imageSeq, {
     frame: frameCount - 1,
-    ease: `steps(${frameCount - 1})`,
+    ease: "none",
     scrollTrigger: {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
       scrub: 0.5
     },
-    onUpdate: () => {
-      const current = Math.floor(frameObj.frame);
-      if (current !== lastFrame && frames[current] && frames[lastFrame]) {
-        frames[lastFrame].classList.remove('active');
-        frames[current].classList.add('active');
-        lastFrame = current;
-      }
-    }
+    onUpdate: render
   });
 
   // 2. Scrollytelling reveals for text steps
