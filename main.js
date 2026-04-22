@@ -266,12 +266,13 @@ const initDismantleAnimations = () => {
   const frameCount = 190;
   const currentFrame = (index) => `/WatchFrames/ezgif-frame-${(index + 1).toString().padStart(3, '0')}.jpg`;
 
-  // Matched exactly to the native image format! (1:1 blitting is infinitely faster than CPU resize)
+  // 1:1 blitting is GPU-friendly (no CPU resize)
   canvas.width = 3840;
   canvas.height = 2160;
 
   const images = [];
   const imageSeq = { frame: 0 };
+  let loadedCount = 0;
 
   // Generate Image objects
   for (let i = 0; i < frameCount; i++) {
@@ -280,40 +281,92 @@ const initDismantleAnimations = () => {
     images.push(img);
   }
 
-  // Draw the image
+  // ── Loading progress overlay ──────────────────────────────────
+  const overlay = document.createElement('div');
+  overlay.id = 'dismantle-loader';
+  overlay.style.cssText = `
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    padding-bottom: 8%; pointer-events: none;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      color: rgba(200,180,140,0.85); font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.65rem, 1.2vw, 0.85rem); letter-spacing: 0.25em;
+      text-transform: uppercase; margin-bottom: 10px;
+    " id="dismantle-loader-label">Loading frames…</div>
+    <div style="
+      width: min(220px, 40vw); height: 1px;
+      background: rgba(200,180,140,0.15); border-radius: 1px; overflow: hidden;
+    ">
+      <div id="dismantle-loader-bar" style="
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, #c8b48c, #e8d4a8);
+        transition: width 0.2s ease;
+      "></div>
+    </div>
+  `;
+  // The dismantle section must be position:relative for the overlay to sit inside
+  section.style.position = 'relative';
+  section.appendChild(overlay);
+
+  const loaderBar   = document.getElementById('dismantle-loader-bar');
+  const loaderLabel = document.getElementById('dismantle-loader-label');
+
+  const updateLoader = () => {
+    const pct = Math.round((loadedCount / frameCount) * 100);
+    if (loaderBar)   loaderBar.style.width = pct + '%';
+    if (loaderLabel) loaderLabel.textContent = pct >= 100 ? 'Ready' : `Loading frames… ${pct}%`;
+    if (pct >= 100) {
+      gsap.to(overlay, { autoAlpha: 0, duration: 0.8, delay: 0.4, onComplete: () => overlay.remove() });
+    }
+  };
+
+  // ── Draw the current frame ───────────────────────────────────
   const render = () => {
     const frameIndex = Math.floor(imageSeq.frame);
     const img = images[frameIndex];
     if (img && img.complete && img.naturalWidth > 0) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(img, 0, 0); // 1:1 GPU-friendly draw
+      context.drawImage(img, 0, 0);
     }
   };
 
-  // Start preloading gracefully sequence by sequence (no network crush)
-  const preloadImages = () => {
-    let index = 0;
-    const loadNext = () => {
-      if (index >= frameCount) return;
-      const img = images[index];
-      img.onload = () => {
-        if (index === 0) render(); // Draw first immediately
-        index++;
-        loadNext();
-      };
-      img.onerror = () => {
-        index++;
-        loadNext();
-      };
-      img.src = img.dataset.src;
+  // ── Parallel connection-pool loader ──────────────────────────
+  //  Serial loading = 190 sequential round-trips (~19s on a real network).
+  //  Pool of 12 = all frames start downloading in overlapping waves (~2-3s).
+  const CONCURRENCY = 12;
+  let launched = 0;
+
+  const launchNext = () => {
+    if (launched >= frameCount) return;
+    const i = launched++;
+    const img = images[i];
+
+    const onDone = () => {
+      loadedCount++;
+      updateLoader();
+      if (i === 0) render(); // Show first frame the instant it's ready
+      launchNext();          // Immediately replace the finished slot
     };
-    loadNext();
+
+    img.onload  = onDone;
+    img.onerror = onDone;
+    img.src = img.dataset.src;
   };
 
-  // Initiate background preload immediately after layout
-  requestIdleCallback ? requestIdleCallback(preloadImages) : setTimeout(preloadImages, 100);
+  const preloadImages = () => {
+    // Boot the initial pool — CONCURRENCY downloads start simultaneously
+    for (let i = 0; i < Math.min(CONCURRENCY, frameCount); i++) {
+      launchNext();
+    }
+  };
 
-  // Canvas scrub timeline
+  // Kick off immediately (no idle delay — we need them fast)
+  preloadImages();
+
+  // ── Canvas scrub timeline ────────────────────────────────────
   gsap.to(imageSeq, {
     frame: frameCount - 1,
     ease: "none",
@@ -326,7 +379,7 @@ const initDismantleAnimations = () => {
     onUpdate: render
   });
 
-  // 2. Scrollytelling reveals for text steps
+  // ── Scrollytelling text reveals ──────────────────────────────
   const steps = gsap.utils.toArray('.dismantle-step-inner');
   steps.forEach((step) => {
     gsap.set(step, { autoAlpha: 0, y: 60 });
